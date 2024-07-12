@@ -1,0 +1,43 @@
+version: '3.12'
+
+services:
+  django_erp_backend:
+    container_name: django_erp_backend
+    image: python:3.12
+    ports:
+      - "96:8000"
+    env_file:
+      - ./.env
+    volumes: 
+      - ./app/:/app
+      - ./addons/:/addons
+      - ./configs/:/configs
+    working_dir: /app
+    command: >
+      bash -c "pip install -r requirements.txt && python manage.py runserver 0.0.0.0:8000"
+  
+  django_erp_ui:
+    container_name: django_erp_ui
+    image: node
+    ports:
+      - "95:3000"
+    env_file: 
+      - ./.env
+    working_dir: /app
+    volumes: 
+      - ./ui-app/:/app
+      - ./addons/:/addons
+      - ./configs/:/configs
+    command: >
+      bash -c "yarn install && yarn dev"
+    depends_on:
+      - django_erp_backend
+  
+  django_erp_db:
+    container_name: django_erp_db
+    image: postgres
+    env_file:
+      - ./.env
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    
